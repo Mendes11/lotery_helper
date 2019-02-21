@@ -1,10 +1,11 @@
 #encoding=utf-8
-from tkinter import Tk, LEFT, Entry, RIGHT, RAISED, BOTH, X, Message, W, \
-    filedialog, StringVar, IntVar, messagebox, Toplevel
-from tkinter.ttk import Style, Frame, Label, Button, Checkbutton
+from tkinter import LEFT, X, IntVar, RIGHT, filedialog, BOTH, Message, RAISED, \
+    StringVar, Toplevel, messagebox, Tk, W
+from tkinter.ttk import Entry, Frame, Label, Checkbutton, Style, Button
 
-from lottery_player import create_lottery_helper_file
-from spinner import Spinner
+from gui.spinner import Spinner
+from lottery_player.lottery_player import (expected_list_size,
+                                           create_lottery_helper_file)
 
 
 def generate_input(frame, label, input_class=None):
@@ -43,7 +44,7 @@ class Application(Frame):
 
     def init_ui(self):
         # Master Configurations
-        self.master.geometry('300x300')
+        self.master.geometry('400x320')
         self.style = Style()
         self.style.theme_use('default')
         self.master.title(u'Gerador de Números de Loteria')
@@ -106,19 +107,33 @@ class Application(Frame):
         except ValueError:
             messagebox.showerror('Erro', 'Digite apenas números')
             return
+        max_size = expected_list_size(range_min, range_max, n_digits)
         try:
             max_combinations = int(self.max_combinations.get())
+            if max_combinations > max_size:
+                messagebox.showerror('Erro',
+                                     'Número Máximo de Combinações: {} é Maior '
+                                     'do que o número total de combinações: '
+                                     '{}'.format(max_combinations, max_size))
+                return
         except ValueError:
             max_combinations = None
         is_random = self.random.get()
         filepath = self.file_path.get()
-        self.popup_dialog()
-        self.wait_window(self.top)
-        create_lottery_helper_file(range_min, range_max, n_digits,
-                                   max_combinations, is_random, filepath)
-        self.top.destroy()
-        messagebox.showinfo('Finalizado', 'Arquivo Gerado com Sucesso em: '
-                                          '{}'.format(filepath))
+        #self.popup_dialog()
+        #self.wait_window(self.top)
+        try:
+            create_lottery_helper_file(range_min, range_max, n_digits,
+                                       max_combinations, is_random, filepath)
+        except BaseException as e:
+            messagebox.showerror("Erro", e)
+        #self.top.destroy()
+        total_combinations = max_size if max_combinations is None else \
+            max_combinations
+        messagebox.showinfo('Finalizado',
+                            'Arquivo Gerado com Sucesso em: {}, '
+                            'com um total de {} combinações'
+                            ''.format(filepath, total_combinations))
 
     def on_file_search_click(self):
         file_path = prompt_file_save_path()
@@ -130,6 +145,6 @@ class Application(Frame):
 
 def initiate_main_interface():
     root = Tk()
-    root.geometry('300x300+300+300')
+    root.geometry('350x350+300+300')
     app = Application()
     root.mainloop()
