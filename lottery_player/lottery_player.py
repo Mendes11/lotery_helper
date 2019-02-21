@@ -7,6 +7,7 @@ from random import sample
 
 from lottery_player.exceptions import WrongRangeException
 
+EXCEL_ROW_LIMIT = 1048576
 
 def generate_number_combinations(range_min, range_max, num_digits):
     """
@@ -55,6 +56,8 @@ def populate_excel_worksheet(worksheet, data, selected_indexes=None):
     """
     num_data = 0
     for row, line in enumerate(data):
+        if num_data > EXCEL_ROW_LIMIT:
+            raise IndexError()
         if selected_indexes is not None and row not in selected_indexes:
             continue
         for col, cell in enumerate(line):
@@ -63,7 +66,7 @@ def populate_excel_worksheet(worksheet, data, selected_indexes=None):
     return worksheet
 
 
-def generate_excel_file(filename, data, selected_indexes=None):
+def generate_excel_file(filename, data, selected_indexes=None, workbook=None):
     """
     Generates an excel file that will store all data in a table form
 
@@ -73,8 +76,15 @@ def generate_excel_file(filename, data, selected_indexes=None):
     :param data: list
     :return: file-like
     """
-    workbook = xlsxwriter.Workbook(filename)
-    populate_excel_worksheet(workbook.add_worksheet(), data, selected_indexes)
+    if workbook is None:
+        workbook = xlsxwriter.Workbook(filename)
+    try:
+        populate_excel_worksheet(workbook.add_worksheet(), data,
+                                 selected_indexes)
+    except IndexError:
+        # Since data is a generator, we just recursively call the function
+        # again and the generator will continue from where it's stopped.
+        generate_excel_file(filename, data, selected_indexes, workbook)
     workbook.close()
 
 
