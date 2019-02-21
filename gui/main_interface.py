@@ -4,7 +4,7 @@ from tkinter import Tk, LEFT, Entry, RIGHT, RAISED, BOTH, X, Message, W, \
 from tkinter.ttk import Style, Frame, Label, Button, Checkbutton
 
 from lottery_player import create_lottery_helper_file
-from spinner import Spinner
+from gui.spinner import Spinner
 
 
 def generate_input(frame, label, input_class=None):
