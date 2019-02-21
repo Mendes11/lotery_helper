@@ -10,7 +10,8 @@ from lottery_player.lottery_player import (expected_list_size,
                                            create_lottery_helper_file)
 
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.getenv('ProgramFiles(x86)') or os.getenv('ProgramFiles') or \
+           os.getcwd()
 
 def generate_input(frame, label, input_class=None):
     if input_class is None:
