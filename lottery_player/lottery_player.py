@@ -3,13 +3,20 @@ from math import factorial
 
 import xlsxwriter
 
-from random import shuffle, choice, sample
+from random import sample
 
 from lottery_player.exceptions import WrongRangeException
 
 
-def generate_number_combinations(range_min, range_max, num_digits,
-                                 max_iter=None, random_selection=False):
+def generate_number_combinations(range_min, range_max, num_digits):
+    """
+    Main function responsible to return the generator with all possible
+    combinations.
+    :param range_min: int
+    :param range_max: int
+    :param num_digits: int
+    :return: generator
+    """
     if range_min > range_max:
         raise WrongRangeException('"Valor Mínimo" deve ser menor do que o '
                                   '"Valor Máximo".')
@@ -19,14 +26,18 @@ def generate_number_combinations(range_min, range_max, num_digits,
 
     combinations = itertools.combinations(range(range_min, range_max+1),
                                                num_digits)
-    # if random_selection:
-    #     shuffle(combinations)
-    # if max_iter is not None:
-    #     return combinations[:max_iter]
     return combinations
 
 
 def expected_list_size(range_min, range_max, num_digits):
+    """
+    Function used to return the size of the combinations. It is useful to
+    provide information about the generator without opening it.
+    :param range_min: int
+    :param range_max: int
+    :param num_digits: int
+    :return: int
+    """
     num_values = range_max - range_min + 1
     numerator = factorial(num_values)
     denominator = factorial(num_digits) * factorial(num_values - num_digits)
@@ -34,11 +45,21 @@ def expected_list_size(range_min, range_max, num_digits):
 
 
 def populate_excel_worksheet(worksheet, data, selected_indexes=None):
+    """
+    Function that will populate a excel worksheet with all provided data.
+    Data should be a generator, but any iterable will do.
+    :param worksheet: worksheet
+    :param data: iterable
+    :param selected_indexes: list
+    :return: worksheet
+    """
+    num_data = 0
     for row, line in enumerate(data):
         if selected_indexes is not None and row not in selected_indexes:
             continue
         for col, cell in enumerate(line):
-            worksheet.write(row, col, cell)
+            worksheet.write(num_data, col, cell)
+        num_data += 1
     return worksheet
 
 
@@ -59,6 +80,16 @@ def generate_excel_file(filename, data, selected_indexes=None):
 
 def create_lottery_helper_file(range_min, range_max, n_digits,
                               max_combinations, is_random, filepath):
+    """
+    Utility function that handles all functionalities that are needed to
+    generate the number combinations and export them.
+    :param range_min: int
+    :param range_max: int
+    :param n_digits: int
+    :param max_combinations: int
+    :param is_random: bool
+    :param filepath: str
+    """
     # First, creates a generator, preventing it from overflowing memory
     combinations = generate_number_combinations(range_min, range_max,
                                                 n_digits)
