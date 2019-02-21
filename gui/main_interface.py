@@ -1,4 +1,6 @@
 #encoding=utf-8
+import os
+
 from tkinter import LEFT, X, IntVar, RIGHT, filedialog, BOTH, Message, RAISED, \
     StringVar, Toplevel, messagebox, Tk, W
 from tkinter.ttk import Entry, Frame, Label, Checkbutton, Style, Button
@@ -7,6 +9,8 @@ from gui.spinner import Spinner
 from lottery_player.lottery_player import (expected_list_size,
                                            create_lottery_helper_file)
 
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 def generate_input(frame, label, input_class=None):
     if input_class is None:
@@ -28,8 +32,10 @@ def generate_input(frame, label, input_class=None):
 
 def prompt_file_save_path():
     file_path = filedialog.asksaveasfilename(
-        initialdir="C:/", title="Selecione",
+        initialdir=BASE_DIR, title="Selecione",
         filetypes=(("arquivo excel", "*.xlsx"), ("all files", "*.*")))
+    if file_path.split('.')[-1] != 'xlsx':
+        file_path += '.xlsx'
     return file_path
 
 
@@ -81,7 +87,7 @@ class Application(Frame):
 
         # Text Variable Binding to file_path_input
         self.file_path = StringVar()
-        self.file_path.set('C:\\')
+        self.file_path.set(BASE_DIR)
         self.file_path_input['textvariable'] = self.file_path
 
         # Buttons
